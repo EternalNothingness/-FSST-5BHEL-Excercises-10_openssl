@@ -52,38 +52,31 @@ int main (void)
 	ciphertext_len = encrypt (plaintext, strlen ((char *)plaintext), key, iv, ciphertext);
 
 	/* Do something useful with the ciphertext here */
+	/*
 	printf("Ciphertext is:\n");
 	BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
-
-	// --------------------------------------------------------------------------------------------------------------------------
-	printf("Ciphertext 2 is:\n");
-	/*
-	unsigned char* vgl_cipher = malloc(sizeof(char*));
-	for(int i=0;i<ciphertext_len;i++){
-		*(vgl_cipher+i) = ciphertext[i];
-		if(*(ciphertext[i+1])==0) *(vgl_cipher+i+1)=0;
-	}
 	*/
+	// --------------------------------------------------------------------------------------------------------------------------
+	printf("Ciphertext is:\n");
 	for(int i=0;i<ciphertext_len;i++){
 		printf("%x ", *(ciphertext+i));
+		if(i+1==ciphertext_len) printf("\n");
 	}
-	printf("\n");
 
-	char* vgl;
-	//vgl = "AAE365272C81078AB6116B361831D0F6A5D3C8587E946B530B7957543107F15E";
-	vgl = "aae365272c81078ab6116b361831d0f6a5d3c8587e946b530b7957543107f15e";
-	unsigned char* vgl_hex = malloc(sizeof(char*));
-	str2hex(vgl, vgl_hex);
-	printf("Ciphertext 3 is:\n");
-	for(int i=0;*(vgl_hex+i)!=0;i++){
-		printf("%x ", *(vgl_hex+i));
+	char* ciphertext_should_str;
+	ciphertext_should_str = "AAE365272C81078AB6116B361831D0F6A5D3C8587E946B530B7957543107F15E";
+	unsigned char* ciphertext_should_hex = malloc(sizeof(char*));
+	str2hex(ciphertext_should_str, ciphertext_should_hex);
+	printf("Ciphertext should:\n");
+	for(int i=0;*(ciphertext_should_hex+i)!=0;i++){
+		printf("%x ", *(ciphertext_should_hex+i));
+		if(*(ciphertext_should_hex+i+1)==0)printf("\n");
 	}
-	printf("\n");
 
-	int icnterr = 0;
+	int cnt_err = 0;
 	for(int i = 0; i<ciphertext_len; i++){
-		if(ciphertext[i] != *(vgl_hex+i)) icnterr++;
-		if(i+1==ciphertext_len) printf("Test finished with %i errors\n", icnterr);
+		if(ciphertext[i] != *(ciphertext_should_hex+i)) cnt_err++;
+		if(i+1==ciphertext_len) printf("Test finished with %i errors\n", cnt_err);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------
@@ -202,22 +195,22 @@ void str2hex(char *str, unsigned char *result){
 	int hex0;
 	for(int i=0;;i++){
 		if(*(str+i)==0) break;
-		else if(*(str+i)=='a') hex1=10;
-		else if(*(str+i)=='b') hex1=11;
-		else if(*(str+i)=='c') hex1=12;
-		else if(*(str+i)=='d') hex1=13;
-		else if(*(str+i)=='e') hex1=14;
-		else if(*(str+i)=='f') hex1=15;
+		else if(*(str+i)=='a'||*(str+i)=='A') hex1=10;
+		else if(*(str+i)=='b'||*(str+i)=='B') hex1=11;
+		else if(*(str+i)=='c'||*(str+i)=='C') hex1=12;
+		else if(*(str+i)=='d'||*(str+i)=='D') hex1=13;
+		else if(*(str+i)=='e'||*(str+i)=='E') hex1=14;
+		else if(*(str+i)=='f'||*(str+i)=='F') hex1=15;
 		else hex1=*(str+i)-'0';
 		i++;
 
 		if(*(str+i)==0) break;
-		else if(*(str+i)=='a') hex0=10;
-		else if(*(str+i)=='b') hex0=11;
-		else if(*(str+i)=='c') hex0=12;
-		else if(*(str+i)=='d') hex0=13;
-		else if(*(str+i)=='e') hex0=14;
-		else if(*(str+i)=='f') hex0=15;
+		else if(*(str+i)=='a'||*(str+i)=='A') hex0=10;
+		else if(*(str+i)=='b'||*(str+i)=='B') hex0=11;
+		else if(*(str+i)=='c'||*(str+i)=='C') hex0=12;
+		else if(*(str+i)=='d'||*(str+i)=='D') hex0=13;
+		else if(*(str+i)=='e'||*(str+i)=='E') hex0=14;
+		else if(*(str+i)=='f'||*(str+i)=='F') hex0=15;
 		else hex0=*(str+i)-'0';
 		*(result+(i/2))=16*hex1+hex0;
 		if(*(str+i+1)==0) *(result+(i/2)+1)=0;
