@@ -3,10 +3,12 @@ Titel: openssl
 Beschreibung:
 Quelle: https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
 Autor: Patrick Wintner
-GitHub: https://github.com/EternalNothingness/FSST-5BHEL-Excercises-10_quicksort.git
-Datum der letzten Bearbeitung: 08.03.2020
+GitHub: https://github.com/EternalNothingness/FSST-5BHEL-Excercises-10_openssl.git
+Datum der letzten Bearbeitung: 10.03.2021
 */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
@@ -22,75 +24,95 @@ void str2hex(char* str, unsigned char* result);
 
 int main (void)
 {
-	/*
-	* Set up the key and iv. Do I need to say to not hard code these in a
-	* real application? :-)
-	*/
+	for(;;){
+		/* A 128 bit key */
+		unsigned char *key = malloc(sizeof(char*));
+		for(;;){
+			memset(key,0,sizeof(key));
+			printf("Key: ");
+			scanf(" %s", key);
+			if(strlen(key)==16) break;
+			printf("Ungueltige Eingabe\n");
+			printf("Key length: %i\n", strlen(key));
+		}
+		//key = (unsigned char *)"BBBBBBBBBBBBBBBB";
 
-	/* A 128 bit key */
-	unsigned char *key = (unsigned char *)"BBBBBBBBBBBBBBBB";
+		/* A 128 bit IV */
+		unsigned char *iv = malloc(sizeof(char*));
+		for(;;){
+			memset(iv,0,sizeof(iv));
+			printf("iv: ");
+			scanf(" %s", iv);
+			if(strlen(iv)==16) break;
+			printf("Ungueltige Eingabe\n");
+			printf("iv length: %i\n", strlen(iv));
+		}
+		//iv = (unsigned char *)"BBBBBBBBBBBBBBBB";
 
-	/* A 128 bit IV */
-	unsigned char *iv = (unsigned char *)"BBBBBBBBBBBBBBBB";
+		/* Message to be encrypted */
+		unsigned char *plaintext = malloc(sizeof(char**));
+		for(int i=0;i<10;i++){
+			memset(plaintext,0,sizeof(plaintext));
+			printf("plaintext: ");
+			scanf(" %[^\n]254s", plaintext);
+			if(plaintext!=0) break;
+		}
+		//plaintext = (unsigned char *)"Schoene Crypto Welt";
 
-	/* Message to be encrypted */
-	unsigned char *plaintext =
-	(unsigned char *)"Schoene Crypto Welt";
+		/*
+		* Buffer for ciphertext. Ensure the buffer is long enough for the
+		* ciphertext which may be longer than the plaintext, depending on the
+		* algorithm and mode.
+		*/
+		unsigned char ciphertext[128];
+		/* Buffer for the decrypted text */
+		unsigned char decryptedtext[128];
+	
+		int decryptedtext_len, ciphertext_len;
 
-	/*
-	* Buffer for ciphertext. Ensure the buffer is long enough for the
-	* ciphertext which may be longer than the plaintext, depending on the
-	* algorithm and mode.
-	*/
-	unsigned char ciphertext[128];
-	/* Buffer for the decrypted text */
-	unsigned char decryptedtext[128];
+		/* Encrypt the plaintext */
+		ciphertext_len = encrypt (plaintext, strlen ((char *)plaintext), key, iv, ciphertext);
 
-	int decryptedtext_len, ciphertext_len;
+		/* Do something useful with the ciphertext here */
+		/*
+		printf("Ciphertext is:\n");
+		BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
+		*/
+		// --------------------------------------------------------------------------------------------------------------------------
+		printf("Ciphertext is:\n");
+		for(int i=0;i<ciphertext_len;i++){
+			printf("%x ", *(ciphertext+i));
+			if(i+1==ciphertext_len) printf("\n");
+		}
 
-	/* Encrypt the plaintext */
-	ciphertext_len = encrypt (plaintext, strlen ((char *)plaintext), key, iv, ciphertext);
+		char* ciphertext_should_str;
+		ciphertext_should_str = "AAE365272C81078AB6116B361831D0F6A5D3C8587E946B530B7957543107F15E";
+		unsigned char* ciphertext_should_hex = malloc(sizeof(char*));
+		str2hex(ciphertext_should_str, ciphertext_should_hex);
+		printf("Ciphertext should:\n");
+		for(int i=0;*(ciphertext_should_hex+i)!=0;i++){
+			printf("%x ", *(ciphertext_should_hex+i));
+			if(*(ciphertext_should_hex+i+1)==0)printf("\n");
+		}
 
-	/* Do something useful with the ciphertext here */
-	/*
-	printf("Ciphertext is:\n");
-	BIO_dump_fp (stdout, (const char *)ciphertext, ciphertext_len);
-	*/
-	// --------------------------------------------------------------------------------------------------------------------------
-	printf("Ciphertext is:\n");
-	for(int i=0;i<ciphertext_len;i++){
-		printf("%x ", *(ciphertext+i));
-		if(i+1==ciphertext_len) printf("\n");
+		int cnt_err = 0;
+		for(int i = 0; i<ciphertext_len; i++){
+			if(ciphertext[i] != *(ciphertext_should_hex+i)) cnt_err++;
+			if(i+1==ciphertext_len) printf("Test finished with %i errors\n", cnt_err);
+		}
+
+		// -------------------------------------------------------------------------------------------------------------
+		/* Decrypt the ciphertext */
+		decryptedtext_len = decrypt(ciphertext, ciphertext_len, key, iv,
+		decryptedtext);
+
+		/* Add a NULL terminator. We are expecting printable text */
+		decryptedtext[decryptedtext_len] = '\0';
+
+		/* Show the decrypted text */
+		printf("Decrypted text is:\n");
+		printf("%s\n", decryptedtext);
 	}
-
-	char* ciphertext_should_str;
-	ciphertext_should_str = "AAE365272C81078AB6116B361831D0F6A5D3C8587E946B530B7957543107F15E";
-	unsigned char* ciphertext_should_hex = malloc(sizeof(char*));
-	str2hex(ciphertext_should_str, ciphertext_should_hex);
-	printf("Ciphertext should:\n");
-	for(int i=0;*(ciphertext_should_hex+i)!=0;i++){
-		printf("%x ", *(ciphertext_should_hex+i));
-		if(*(ciphertext_should_hex+i+1)==0)printf("\n");
-	}
-
-	int cnt_err = 0;
-	for(int i = 0; i<ciphertext_len; i++){
-		if(ciphertext[i] != *(ciphertext_should_hex+i)) cnt_err++;
-		if(i+1==ciphertext_len) printf("Test finished with %i errors\n", cnt_err);
-	}
-
-	// -------------------------------------------------------------------------------------------------------------
-	/* Decrypt the ciphertext */
-	decryptedtext_len = decrypt(ciphertext, ciphertext_len, key, iv,
-	decryptedtext);
-
-	/* Add a NULL terminator. We are expecting printable text */
-	decryptedtext[decryptedtext_len] = '\0';
-
-	/* Show the decrypted text */
-	printf("Decrypted text is:\n");
-	printf("%s\n", decryptedtext);
-
 	return 0;
 }
 
