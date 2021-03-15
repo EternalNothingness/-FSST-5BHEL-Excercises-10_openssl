@@ -7,7 +7,7 @@ von ihm eingegebene Texte mit von ihm gewählten Schlüsseln und Init-Vektoren e
 entschluesseln lassen.
 Quelle: https://wiki.openssl.org/index.php/EVP_Symmetric_Encryption_and_Decryption
 Autor: Patrick Wintner
-GitHub: https://github.com/EternalNothingness/FSST-5BHEL-Excercises-10_openssl.git
+GitHub: https://github.com/EternalNothingness/-FSST-5BHEL-Excercises-10_openssl.git
 Datum der letzten Bearbeitung: 15.03.2021
 */
 
